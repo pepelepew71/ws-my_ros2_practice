@@ -13,9 +13,9 @@ class Server(Node):
         super().__init__(node_name="server")
         self.get_logger().info(message="server start")
         self.pub_chatroom = self.create_publisher(msg_type=String, topic="/chatroom", qos_profile=10)
-        self.create_service(srv_type=Message, srv_name="/server/send_message", callback=self._service_send_message_callback)
+        self.create_service(srv_type=Message, srv_name=f"{self.get_name()}/send_message", callback=self._service_callback)
 
-    def _service_send_message_callback(self, request, response):
+    def _service_callback(self, request, response):
         msg = String()
         msg.data = f"{request.name}: {request.message}"
         self.pub_chatroom.publish(msg=msg)
@@ -23,9 +23,14 @@ class Server(Node):
 
 
 def main():
-    rclpy.init(args=None)
-    server = Server()
+
     try:
+        rclpy.init(args=None)
+        _checker = rclpy.create_node(node_name="_checker")
+        if "server" in _checker.get_node_names():
+            print("Node server exists")
+            return
+        server = Server()
         rclpy.spin(node=server)
     except KeyboardInterrupt:
         server.destroy_node()

@@ -106,9 +106,16 @@ class MainFrame(tk.Frame):
 
 if __name__ == "__main__":
 
-    username = input("User's name: ")
-
     rclpy.init()
+    _checker = rclpy.create_node(node_name="_checker")
+
+    while True:
+        username = input("Choose username: ")
+        if username in _checker.get_node_names():
+            print(f"User {username} exists. ", end="")
+            continue
+        break
+
     NODE = MyNode(username=username)
     thread_spin = threading.Thread(target=rclpy.spin, args=(NODE, ))
     thread_spin.start()
